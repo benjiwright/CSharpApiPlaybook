@@ -1,0 +1,200 @@
+{
+	"info": {
+		"_postman_id": "9844fa5a-2722-43a2-a04f-991f945394d3",
+		"name": "CSharpApiBoilerplate",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "491736"
+	},
+	"item": [
+		{
+			"name": "Get Breakfast",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/{{controller}}/{{last_breakfast_guid}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"{{controller}}",
+						"{{last_breakfast_guid}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Breakfast",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"pm.collectionVariables.set('last_breakfast_guid', jsonData.id)  \r",
+							"console.log(`new guid for breakfast: ${jsonData.id}`)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Steak and Eggs\",\r\n    \"description\": \"Bacon ipsum dolor amet corned beef chicken buffalo meatball shank beef ribs. Meatball picanha tongue, buffalo t-bone flank alcatra kielbasa pig tri-tip. Short loin jowl t-bone pastrami. Pancetta bacon spare ribs meatball short ribs. Ham hock strip steak kielbasa pastrami flank leberkas, meatball pancetta.\",\r\n    \"startDateTime\": \"2022-01-01T11:00:00\",\r\n    \"endDateTime\": \"2022-01-01T16:30:00\",\r\n    \"Sweets\": [\r\n        \"French Toast\",\r\n        \"Pancakes\"\r\n    ],\r\n    \"Savories\": [\r\n        \"Oatmeal\",\r\n        \"Avocado Toast\",\r\n        \"Bacon\"\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/{{controller}}/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"{{controller}}",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Breakfast",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/{{controller}}/{{$guid}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"{{controller}}",
+						"{{$guid}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upsert Breakfast - Found Id (update)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"pm.collectionVariables.set('last_breakfast_guid', jsonData.id)  \r",
+							"console.log(`new guid for breakfast: ${jsonData.id}`)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Steak and Eggs - Renamed\",\r\n    \"description\": \"Bacon ipsum dolor amet corned beef chicken buffalo meatball shank beef ribs. Meatball picanha tongue, buffalo t-bone flank alcatra kielbasa pig tri-tip. Short loin jowl t-bone pastrami. Pancetta bacon spare ribs meatball short ribs. Ham hock strip steak kielbasa pastrami flank leberkas, meatball pancetta.\",\r\n    \"startDateTime\": \"2022-01-01T11:00:00\",\r\n    \"endDateTime\": \"2022-01-01T16:30:00\",\r\n    \"Sweets\": [\r\n    ],\r\n    \"Savories\": [\r\n        \"Oatmeal\",\r\n        \"Avocado Toast\",\r\n        \"Bacon\"\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/{{controller}}/{{last_breakfast_guid}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"{{controller}}",
+						"{{last_breakfast_guid}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upsert Breakfast - New Id (insert)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"pm.collectionVariables.set('last_breakfast_guid', jsonData.id)  \r",
+							"console.log(`new guid for breakfast: ${jsonData.id}`)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Spicy New Item\",\r\n    \"description\": \"Spicy jalapeno biltong strip steak chicken leberkas meatball prosciutto sausage hamburger andouille shankle spare ribs pork buffalo jowl alcatra. Alcatra turducken doner corned beef shoulder spare ribs, bacon shank capicola t-bone bresaola ground round strip steak. Drumstick shankle meatball, fatback pastrami beef shank bresaola. Frankfurter burgdoggen pork chop, beef ribs brisket turkey sausage pig rump cow tenderloin meatloaf.\",\r\n    \"startDateTime\": \"2022-07-01T11:00:00\",\r\n    \"endDateTime\": \"2022-07-01T16:30:00\",\r\n    \"Sweets\": [\r\n        \"Sugar\",\r\n        \"Corn Syrup\"\r\n    ],\r\n    \"Savories\": [\r\n        \"Yellow Bird\"\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/{{controller}}/{{$guid}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"{{controller}}",
+						"{{$guid}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "http://localhost:5096"
+		},
+		{
+			"key": "controller",
+			"value": "breakfast"
+		},
+		{
+			"key": "last_breakfast_guid",
+			"value": ""
+		}
+	]
+}
