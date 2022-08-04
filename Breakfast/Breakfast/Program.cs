@@ -1,6 +1,9 @@
+using Breakfast.Services.Breakfasts;
+
 var builder = WebApplication.CreateBuilder(args);
 {
    builder.Services.AddControllers();
+   builder.Services.AddSingleton<IBreakfastService, BreakfastService>();
 }
 
 var app = builder.Build();
