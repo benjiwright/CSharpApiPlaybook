@@ -202,3 +202,94 @@ register DI in Program.cs
 ```csharp
 builder.Services.AddSingleton<IBreakfastService, BreakfastService>();
 ```
+
+### better error handling
+
+add to the middleware pipeline at the beginning
+
+```csharp
+var app = builder.Build();
+{
+   const string exceptionRoute = "/error";
+   app.UseExceptionHandler(exceptionRoute);
+   // ...
+}
+```
+
+create new error route / controller
+
+```csharp
+public class ErrorsController : ControllerBase
+{
+   [Route("/error")]
+   public IActionResult Error()
+   {
+      return Problem();
+   }
+}
+
+```
+
+optional: use error lib/package
+
+```bash
+ dotnet add ./$PROJECT_NAME package ErrorOr
+ mkdir ./${PROJECT_NAME}/ServiceErrors
+ touch ./${PROJECT_NAME}/ServiceErrors/Errors.Breakfast.cs
+```
+
+create specific errors to things that can go wrong in our service. E.g.: Look for breakfast by Id, but not found.
+
+```csharp
+// ... Custom error for when Breakfast is not found
+
+namespace Breakfast.ServiceErrors;
+
+using ErrorOr;
+
+public static class Errors
+{
+   public static class Breakfast
+   {
+      public static Error NotFound => Error.NotFound(
+         code: "Breakfast.NotFound",
+         description: "Breakfast not found"
+      );
+   }
+}
+
+// ... Update the service to use our custom error
+
+public interface IBreakfastService
+{
+   ErrorOr<Breakfast> GetBreakfast(Guid id);
+}
+
+public ErrorOr<Breakfast> GetBreakfast(Guid id)
+{
+   if (InMemoryBreakfasts.TryGetValue(id, out var breakfast))
+   {
+      return breakfast;
+   }
+
+   return Errors.Breakfast.NotFound;
+}
+
+/// ... Update Api controller as well
+
+   [HttpGet("{id:guid}")]
+   public IActionResult GetBreakfast(Guid id)
+   {
+      var getBreakfastResult = _breakfastService.GetBreakfast(id);
+
+      if (getBreakfastResult.IsError) return NotFound();
+      
+      // TODO: auto-mapper
+      var breakfast = getBreakfastResult.Value;
+      var response = MapCreateBreakfastResponse(breakfast);
+
+      return Ok(response);
+   }
+
+
+```
