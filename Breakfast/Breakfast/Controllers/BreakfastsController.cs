@@ -1,13 +1,10 @@
 ﻿using Breakfast.RequestResponse;
 using Breakfast.Services.Breakfasts;
-using ErrorOr;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Breakfast.Controllers;
 
-[ApiController]
-[Route("[controller]")]
-public class BreakfastsController : ControllerBase
+public class BreakfastsController : ApiController
 {
    private readonly IBreakfastService _breakfastService;
 
@@ -55,16 +52,13 @@ public class BreakfastsController : ControllerBase
    {
       var getBreakfastResult = _breakfastService.GetBreakfast(id);
 
-      if (getBreakfastResult.IsError) return NotFound();
-      
-      // TODO: automapper
-      var breakfast = getBreakfastResult.Value;
-      var response = MapCreateBreakfastResponse(breakfast);
-
-      return Ok(response);
+      return getBreakfastResult.Match(
+         breakfast => Ok(MapCreateBreakfastResponse(breakfast)),
+         errors => Problem(errors));
    }
 
-   private static CreateBreakfastResponse MapCreateBreakfastResponse(Models.Breakfast breakfast)
+   // TODO: automapper
+   private CreateBreakfastResponse MapCreateBreakfastResponse(Models.Breakfast breakfast)
    {
       var response = new CreateBreakfastResponse(
          breakfast.Id,

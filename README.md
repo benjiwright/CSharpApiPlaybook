@@ -293,3 +293,50 @@ public ErrorOr<Breakfast> GetBreakfast(Guid id)
 
 
 ```
+
+### refactoring
+
+generic api controller for all our controllers
+
+```csharp
+using ErrorOr;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Breakfast.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class ApiController : ControllerBase
+{
+   // sorta an override
+   protected IActionResult Problem(List<Error> errors)
+   {
+      var firstError = errors.FirstOrDefault();
+      var statusCode = firstError.Type switch
+      {
+         ErrorType.NotFound => StatusCodes.Status404NotFound,
+         ErrorType.Validation => StatusCodes.Status400BadRequest,
+         ErrorType.Conflict => StatusCodes.Status409Conflict,
+         _ => StatusCodes.Status500InternalServerError
+      };
+
+      return Problem(statusCode: statusCode, title: firstError.Description);
+   }
+}
+
+// ... make breakfast controller lean
+
+public class BreakfastsController : ApiController // ihherit from new base class
+
+
+   [HttpGet("{id:guid}")]
+   public IActionResult GetBreakfast(Guid id)
+   {
+      var getBreakfastResult = _breakfastService.GetBreakfast(id);
+
+      return getBreakfastResult.Match(
+         breakfast => Ok(MapCreateBreakfastResponse(breakfast)),
+         errors => Problem(errors));
+   }
+
+```
