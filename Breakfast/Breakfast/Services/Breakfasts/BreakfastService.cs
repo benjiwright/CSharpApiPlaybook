@@ -7,10 +7,10 @@ using ErrorOr;
 
 public interface IBreakfastService
 {
-   void CreateBreakfast(Models.Breakfast breakfast);
+   ErrorOr<Created> CreateBreakfast(Breakfast breakfast);
    ErrorOr<Breakfast> GetBreakfast(Guid id);
-   Breakfast UpsertBreakfast(Guid id, Models.Breakfast breakfast);
-   void DeleteBreakfast(Guid id);
+   ErrorOr<UpsertedBreakfast> UpsertBreakfast(Guid id, Breakfast breakfast);
+   ErrorOr<Deleted> DeleteBreakfast(Guid id);
 }
 
 public class BreakfastService : IBreakfastService
@@ -18,9 +18,10 @@ public class BreakfastService : IBreakfastService
    // in memory persistence 
    private static readonly Dictionary<Guid, Breakfast> InMemoryBreakfasts = new();
 
-   public void CreateBreakfast(Breakfast breakfast)
+   public ErrorOr<Created> CreateBreakfast(Breakfast breakfast)
    {
       InMemoryBreakfasts.Add(breakfast.Id, breakfast);
+      return Result.Created;
    }
 
    public ErrorOr<Breakfast> GetBreakfast(Guid id)
@@ -33,8 +34,10 @@ public class BreakfastService : IBreakfastService
       return Errors.Breakfast.NotFound;
    }
 
-   public Breakfast UpsertBreakfast(Guid id, Breakfast breakfast)
+   public ErrorOr<UpsertedBreakfast> UpsertBreakfast(Guid id, Breakfast breakfast)
    {
+      var isNewlyCreated = !InMemoryBreakfasts.ContainsKey(breakfast.Id);
+      
       if (!InMemoryBreakfasts.ContainsKey(id))
       {
          InMemoryBreakfasts.Add(id, breakfast);
@@ -44,11 +47,12 @@ public class BreakfastService : IBreakfastService
          InMemoryBreakfasts[id] = breakfast;
       }
 
-      return InMemoryBreakfasts[id];
+      return new UpsertedBreakfast(isNewlyCreated);
    }
 
-   public void DeleteBreakfast(Guid id)
+   public ErrorOr<Deleted> DeleteBreakfast(Guid id)
    {
       InMemoryBreakfasts.Remove(id);
+      return Result.Deleted;
    }
 }

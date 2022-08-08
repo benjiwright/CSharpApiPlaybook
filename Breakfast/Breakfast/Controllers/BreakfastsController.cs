@@ -28,23 +28,11 @@ public class BreakfastsController : ApiController
          request.Savories
       );
 
-      _breakfastService.CreateBreakfast(breakfast);
+      var createBreakfastResult = _breakfastService.CreateBreakfast(breakfast);
 
-      // covert our model back to an api response 
-      var response = new CreateBreakfastResponse(
-         breakfast.Id,
-         breakfast.Name,
-         breakfast.Description,
-         breakfast.StartDateTime,
-         breakfast.EndDateTime,
-         breakfast.LastModified,
-         breakfast.Savories,
-         breakfast.Sweets);
-
-      return CreatedAtAction( // 204
-         actionName: nameof(GetBreakfast), // endpoint
-         routeValues: new {id = breakfast.Id}, // route requires the new Id
-         value: response); // payload
+      return createBreakfastResult.Match(
+         _ => CreatedAtBreakfast(breakfast),
+         errors => Problem(errors));
    }
 
    [HttpGet("{id:guid}")]
@@ -54,6 +42,40 @@ public class BreakfastsController : ApiController
 
       return getBreakfastResult.Match(
          breakfast => Ok(MapCreateBreakfastResponse(breakfast)),
+         errors => Problem(errors));
+   }
+
+
+   [HttpPut("{id:guid}")]
+   public IActionResult UpsertBreakfast(Guid id, UpsertBreakRequest request)
+   {
+      var breakfast = new Models.Breakfast(
+         id,
+         request.Name,
+         request.Description,
+         request.StartDateTime,
+         request.EndDateTime,
+         DateTime.Now,
+         request.Sweets,
+         request.Savories);
+
+      var upsertBreakfastResult = _breakfastService.UpsertBreakfast(id, breakfast);
+
+      return upsertBreakfastResult.Match(
+         upsert => upsert.IsNewlyCreated
+            ? CreatedAtBreakfast(breakfast)
+            : NoContent(),
+         errors => Problem(errors));
+
+   }
+
+   [HttpDelete("{id:guid}")]
+   public IActionResult DeleteBreakfast(Guid id)
+   {
+      var deleteBreakfastResult = _breakfastService.DeleteBreakfast(id);
+
+      return deleteBreakfastResult.Match(
+         _ => NoContent(),
          errors => Problem(errors));
    }
 
@@ -72,38 +94,11 @@ public class BreakfastsController : ApiController
       return response;
    }
 
-   [HttpPut("{id:guid}")]
-   public IActionResult UpsertBreakfast(Guid id, UpsertBreakRequest request)
+   private CreatedAtActionResult CreatedAtBreakfast(Models.Breakfast breakfast)
    {
-      var breakfast = new Models.Breakfast(
-         id,
-         request.Name,
-         request.Description,
-         request.StartDateTime,
-         request.EndDateTime,
-         DateTime.Now,
-         request.Sweets,
-         request.Savories);
-
-      var model = _breakfastService.UpsertBreakfast(id, breakfast);
-
-      var response = new CreateBreakfastResponse(
-         model.Id,
-         model.Name,
-         model.Description,
-         model.StartDateTime,
-         model.EndDateTime,
-         model.LastModified,
-         model.Sweets,
-         model.Savories);
-
-      return Ok(response);
-   }
-
-   [HttpDelete("{id:guid}")]
-   public IActionResult DeleteBreakfast(Guid id)
-   {
-      _breakfastService.DeleteBreakfast(id);
-      return NoContent();
+      return CreatedAtAction( // 204
+         actionName: nameof(GetBreakfast), // endpoint
+         routeValues: new {id = breakfast.Id}, // route requires the new Id
+         value: MapCreateBreakfastResponse(breakfast)); // payload
    }
 }
